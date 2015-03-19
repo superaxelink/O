@@ -1,5 +1,5 @@
 
-! Axl
+! Ax
 
   subroutine eigenbound_geometry2
 ! include modules
