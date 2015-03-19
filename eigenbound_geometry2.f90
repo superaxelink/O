@@ -1,6 +1,5 @@
 
-
-
+! Axl
 
   subroutine eigenbound_geometry2
 ! include modules
@@ -15,10 +14,7 @@
   integer k
   logical contains
 
-  real(8) dr_Aa,idr,dr_phi,dr_B,dr_K,B
-
   idr = 1.0d0/dr
-  k=Nr
 
 ! ************************
 ! ***   SANITY CHECK   ***
@@ -44,17 +40,18 @@
 
   if (order=="two") then
 
-!    I do this to fourth order to improve the boundary behavior.
-
-     dr_salpha =0
+     dr_alpha =0
      dr_K=0
+     alpha[Nr]=alpha[Nr]+idr*0.5*(3*alpha[Nr]-alpha[Nr-1]+alpha[Nr-2]) 
+     K[Nr]=K[Nr]+idr*0.5*(3*K[Nr]-K[Nr-1]+K[Nr-2])
 
   else if (order=="four") then
 
-!    I do this to fifth order to improve the boundary behavior.
-
-     dr_salpha =0
+     dr_alpha =0
      dr_K=0
+     alpha[Nr]=alpha[Nr]+(idr/12)*(25*alpha[Nr]-48*alpha[Nr-1]+36*alpha[Nr-2]-16*alpha[Nr-3]+3*alpha[Nr-4])
+     K[Nr]=K[Nr]+(idr/12)*(25*K[Nr]-48*K[Nr-1]+36*K[Nr-2]-16*K[Nr-3]+3*K[Nr-4])
+
 
   end if
 
@@ -62,41 +59,32 @@
 
   if (order=="two") then
 
-!    I do this to fourth order to improve the boundary behavior.
-
-     dr_phi = idr*(25.d0*phi(Nr) - 48.d0*phi(Nr-1) &
-             + 36.d0*phi(Nr-2) - 16.d0*phi(Nr-3) + 3.d0*phi(Nr-4))/12.d0
+     dr_phi = (idr/12)*(idr*0.5*(3*phi[Nr]-phi[Nr-1]+phi[Nr-2])
 
   else if (order=="four") then
 
-!    I do this to fifth order to improve the boundary behavior.
-
-     dr_phi = idr*(137.0d0/60.0d0*phi(Nr) - 5.0d0*phi(Nr-1) + 5.0d0*phi(Nr-2) &
-             - 10.0d0/3.0d0*phi(Nr-3) + 5.0d0/4.0d0*phi(Nr-4) - 0.2d0*phi(Nr-5))
+     dr_phi = idr/12*(25*phi[Nr]-48*phi[Nr-1]+36*phi[Nr-2]-16*phi[Nr-3]+3*phi[Nr-4])
 
 ! Derivative of B.
   if (order=="two") then
 
-!    I do this to fourth order to improve the boundary behavior.
-
-     dr_B = idr*(25.d0*B(Nr) - 48.d0*B(Nr-1) &
-           + 36.d0*B(Nr-2) - 16.d0*B(Nr-3) + 3.d0*B(Nr-4))/12.d0
+     dr_B = (idr/12)*(idr*0.5*(3*B[Nr]-B[Nr-1]+B[Nr-2])
 
   else if (order=="four") then
 
-!    I do this to fifth order to improve the boundary behavior.
-
-     dr_B = idr*(137.0d0/60.0d0*B(Nr) - 5.0d0*B(Nr-1) + 5.0d0*B(Nr-2) &
-           - 10.0d0/3.0d0*B(Nr-3) + 5.0d0/4.0d0*B(Nr-4) - 0.2d0*B(Nr-5))
+     dr_B = idr/12*(25*B[Nr]-48*B[Nr-1]+36*B[Nr-2]-16*B[Nr-3]+3*B[Nr-4])
 
   end if
 ! Principal equation
-  dr_Aa=2/3*dr_K+6*Aa*dr_phi(Nr)+2/3*Aa*(2*1/r+dr_B/B(Nr))
-  if (order=='two') then
-     Aa = 3.d0*dr*D1_Aa
-  else if (order=='four') then
-     Aa = (12.d0*dr*d1_Aa + 48.d0*auxarray(Nr-1) - 36.d0*auxarray(Nr-2) &
-            + 16.d0*auxarray(Nr-3) - 3.d0*auxarray(Nr-4))/25.d0
+  dr_KTA=2/3*dr_K+6*KTA[Nr]*dr_phi(Nr)+2/3*Aa*(2*1/r+dr_B/B(Nr))
+  idr_KTA=1./dr_KTA
+  if (order=="two") then
+
+     KTA =KTA[Nr]+(idr_KTA/12)*(idr*0.5*(3*KTA[Nr]-KTA[Nr-1]+KTA[Nr-2])
+
+  else if (order=="four") then
+
+     KTA[] =KTA[Nr]+idr_KTA/12*(25*B[Nr]-48*KTA[Nr-1]+36*KTA[Nr-2]-16*KTA[Nr-3]+3*KTA[Nr-4])
   end
 																			
 
